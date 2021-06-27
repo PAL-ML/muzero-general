@@ -20,13 +20,18 @@ class MuZeroConfig:
         self.seed = 0  # Seed for numpy, torch and the game
         self.max_num_gpus = None  # Fix the maximum number of GPUs to use. It's usually faster to use a single GPU (set it to 1) if it has enough memory. None will use every GPUs available
 
-
+        ### decoding the action space (manually)
+        # 4-> to the left
+        # 3-> to the right
+        #
+        # aligns with https://github.com/openai/gym/blob/master/gym/envs/atari/atari_env.py
 
         ### Game
         self.observation_shape = (1, 1, 128)  # Dimensions of the game observation, must be 3D (channel, height, width). For a 1D array, please reshape it to (1, 1, length of array)
-        self.action_space = list(range(4))  # Fixed list of all possible actions. You should only edit the length
+        self.action_space = [0,1,3,4]
+        # self.action_space = list(range(4))  # Fixed list of all possible actions. You should only edit the length
         self.players = list(range(1))  # List of players. You should only edit the length
-        self.stacked_observations = 1  # Number of previous observations and previous actions to add to the current observation
+        self.stacked_observations = 0  # Number of previous observations and previous actions to add to the current observation
 
         # Evaluate
         self.muzero_player = 0  # Turn Muzero begins to play (0: MuZero plays first, 1: MuZero plays second)
@@ -53,13 +58,14 @@ class MuZeroConfig:
 
 
         ### Network
-        self.network = "resnet"  # "resnet" / "fullyconnected"
+        self.network = "fullyconnected"  # "resnet" / "fullyconnected"
         self.support_size = 10  # Value and reward are scaled (with almost sqrt) and encoded on a vector with a range of -support_size to support_size. Choose it so that support_size <= sqrt(max(abs(discounted reward)))
 
-        # Residual Network
-        self.downsample = "resnet"  # Downsample observations before representation network, False / "CNN" (lighter) / "resnet" (See paper appendix Network Architecture)
+        # Residual Network - all irrelevant
+        self.downsample = False  # Downsample observations before representation network, False / "CNN" (lighter) / "resnet" (See paper appendix Network Architecture)
         self.blocks = 2  # Number of blocks in the ResNet
-        self.channels = 16  # Number of channels in the ResNet
+        # self.channels = 16  # Number of channels in the ResNet
+        self.channels = 1
         self.reduced_channels_reward = 4  # Number of channels in reward head
         self.reduced_channels_value = 4  # Number of channels in value head
         self.reduced_channels_policy = 4  # Number of channels in policy head
@@ -69,11 +75,11 @@ class MuZeroConfig:
 
         # Fully Connected Network
         self.encoding_size = 10
-        self.fc_representation_layers = []  # Define the hidden layers in the representation network
+        self.fc_representation_layers = [16]  # Define the hidden layers in the representation network
         self.fc_dynamics_layers = [16]  # Define the hidden layers in the dynamics network
         self.fc_reward_layers = [16]  # Define the hidden layers in the reward network
-        self.fc_value_layers = []  # Define the hidden layers in the value network
-        self.fc_policy_layers = []  # Define the hidden layers in the policy network
+        self.fc_value_layers = [16]  # Define the hidden layers in the value network
+        self.fc_policy_layers = [16]  # Define the hidden layers in the policy network
 
 
 
@@ -170,7 +176,8 @@ class Game(AbstractGame):
         Returns:
             An array of integers, subset of the action space.
         """
-        return list(range(4))
+        return [0,1,3,4]
+        # return list(range(4))
 
     def reset(self):
         """
@@ -198,4 +205,3 @@ class Game(AbstractGame):
         """
         self.env.render()
         input("Press enter to take a step ")
-
