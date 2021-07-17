@@ -7,6 +7,10 @@ import torch
 
 import models
 
+# for TPUs
+import torch_xla
+import torch_xla.core.xla_model as xm
+
 
 @ray.remote
 class Trainer:
@@ -25,13 +29,15 @@ class Trainer:
         # Initialize the network
         self.model = models.MuZeroNetwork(self.config)
         self.model.set_weights(copy.deepcopy(initial_checkpoint["weights"]))
-        self.model.to(torch.device("cuda" if self.config.train_on_gpu else "cpu"))
+        # self.model.to(torch.device("cuda" if self.config.train_on_gpu else "cpu"))
+        self.model.to(xm.xla_device()) # TPU
         self.model.train()
 
         self.training_step = initial_checkpoint["training_step"]
 
-        if "cuda" not in str(next(self.model.parameters()).device):
-            print("You are not training on GPU.\n")
+        print("You are training on TPU:", xm.xla_device())
+        # if "cuda" not in str(next(self.model.parameters()).device):
+            # print("You are not training on GPU.\n")
 
         # Initialize the optimizer
         if self.config.optimizer == "SGD":
