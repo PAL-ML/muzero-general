@@ -35,9 +35,8 @@ def runSelfPlayWrapped(checkpoint, game, config, replay_buffer_worker, shared_st
 		# when we have multiple self-play workers, we'll want this to happen only when all of them
 		# are ready. we can achieve that using rendezvous and taking advantage of spawn's blocking 
 		shared_storage_worker.set_info.remote("trainer_can_start", True)
-
+		
 		self_play_worker.continuous_self_play(shared_storage_worker, replay_buffer_worker)
-
 
 	xmp.spawn(
 		map_fn,
@@ -64,12 +63,10 @@ def runTrainerWrapper(checkpoint, config, replay_buffer_worker, shared_storage_w
 			replay_buffer_worker, shared_storage_worker
 		)
 
-
-
 	xmp.spawn(
 		map_fn,
 		args=(),
-		nprocs=N_PROC,
+		nprocs=1, 
 		start_method=START_METHOD
 		)
 
