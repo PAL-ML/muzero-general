@@ -90,7 +90,7 @@ class MuZero:
             self.num_gpus = math.floor(self.num_gpus)
 
         ray.init(num_gpus=total_gpus, ignore_reinit_error=True)
-        
+
         # Checkpoint and replay buffer used to initialize workers
         self.checkpoint = {
             "weights": None,
@@ -165,8 +165,8 @@ class MuZero:
         # order: start self-play, then trainer, then reanalyse (if at all)
         # TODO: import these
 
-        wrappers.runSelfPlayWrapped(self.checkpoint, self.Game, self.config)
-        wrappers.runTrainerWrapper(self.checkpoint, self.config)
+        wrappers.runSelfPlayWrapped.remote(self.checkpoint, self.Game, self.config)
+        wrappers.runTrainerWrapper.remote(self.checkpoint, self.config)
 
         # MIGHT NEED to instantiate the model separate from running continuous....
 

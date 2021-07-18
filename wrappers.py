@@ -30,6 +30,7 @@ def runSelfPlayWrapped(checkpoint, game, config):
 
 	def map_fn(index):
 		self_play_worker = self_play.SelfPlay(checkpoint, game, config, config.seed)
+		xm.rendezvous("selfplay.done")
 		print("SELF PLAY FUCK YES")
 
 	xmp.spawn(
@@ -44,6 +45,7 @@ def runTrainerWrapper(checkpoint, config):
 	# TODO: logging loop!
 
 	def map_fn(index):
+		xm.rendezvous("selfplay.done")
 		training_worker = trainer.Trainer(checkpoint, config)
 		print("TRAINER FUCK YES")
 
