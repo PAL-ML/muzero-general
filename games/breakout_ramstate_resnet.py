@@ -42,7 +42,7 @@ class MuZeroConfig:
 
         ### Self-Play
         self.num_workers = 1  # Number of simultaneous threads/workers self-playing to feed the replay buffer
-        self.selfplay_on_gpu = False
+        self.selfplay_on_gpu = True
         self.max_moves = 2500  # Maximum number of moves if game is not finished before
         self.num_simulations = 30  # Number of future moves self-simulated
         self.discount = 0.997  # Chronological discount of the reward
@@ -93,7 +93,7 @@ class MuZeroConfig:
         self.batch_size = 16  # Number of parts of games to train on at each training step
         self.checkpoint_interval = 500  # Number of training steps before using the model for self-playing
         self.value_loss_weight = 0.25  # Scale the value loss to avoid overfitting of the value function, paper recommends 0.25 (See paper appendix Reanalyze)
-        self.train_on_gpu = torch.cuda.is_available()  # Train on GPU if available
+        self.train_on_gpu = True # torch.cuda.is_available()  # Train on GPU if available
 
         self.optimizer = "Adam"  # "Adam" or "SGD". Paper uses SGD
         self.weight_decay = 1e-4  # L2 weights regularization
@@ -115,8 +115,8 @@ class MuZeroConfig:
         self.PER_alpha = 1  # How much prioritization is used, 0 corresponding to the uniform case, paper suggests 1
 
         # Reanalyze (See paper appendix Reanalyse)
-        self.use_last_model_value = False  # Use the last model to provide a fresher, stable n-step value (See paper appendix Reanalyze)
-        self.reanalyse_on_gpu = False
+        self.use_last_model_value = True  # Use the last model to provide a fresher, stable n-step value (See paper appendix Reanalyze)
+        self.reanalyse_on_gpu = True
 
 
 
