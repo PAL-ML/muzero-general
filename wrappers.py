@@ -46,13 +46,15 @@ def runTrainerWrapper(checkpoint, config, fetch):
 	def map_fn(index):
 		c = 0
 
-		while not fetch() and c < 30:
+		while not fetch() and c < 120:
 			print(f"fetch false, sleeping ({c})")
-			time.sleep(2)
+			time.sleep(4)
 			c += 1
 
 		if not fetch():
 			raise Exception("Timeout while waiting for hook to hook heh")
+		else:
+			print("THE HOOK WORKED BABY")
 
 		print("starting trainer")
 		training_worker = trainer.Trainer(checkpoint, config)
