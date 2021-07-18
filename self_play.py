@@ -27,11 +27,14 @@ class SelfPlay:
         numpy.random.seed(seed)
         torch.manual_seed(seed)
 
+        self.device = torch.device(xm.get_xla_supported_devices(devkind="TPU")[2])
+
         # Initialize the network
         self.model = models.MuZeroNetwork(self.config)
         self.model.set_weights(initial_checkpoint["weights"])
+        self.model.to(self.device)
         # self.model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
-        self.model.to(xm.xla_device()) # TPU
+        # self.model.to(xm.xla_device()) # TPU
         #self.model.to(torch.device("cpu"))
         self.model.eval()
         print("selfplay ready to GO")
@@ -291,7 +294,8 @@ class MCTS:
                 torch.tensor(observation)
                 .float()
                 .unsqueeze(0)
-                .to(next(model.parameters()).device)
+                .to(self.device)
+                # .to(next(model.parameters()).device)
             )
             (
                 root_predicted_value,
@@ -348,7 +352,8 @@ class MCTS:
             parent = search_path[-2]
             value, reward, policy_logits, hidden_state = model.recurrent_inference(
                 parent.hidden_state,
-                torch.tensor([[action]]).to(parent.hidden_state.device),
+                torch.tensor([[action]]).to(self.device),
+                # torch.tensor([[action]]).to(parent.hidden_state.device),
             )
             value = models.support_to_scalar(value, self.config.support_size).item()
             reward = models.support_to_scalar(reward, self.config.support_size).item()
