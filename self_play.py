@@ -159,7 +159,7 @@ class SelfPlay:
                         stacked_observations,
                         self.game.legal_actions(),
                         self.game.to_play(),
-                        True,
+                        True
                     )
                     action = self.select_action(
                         root,
@@ -285,6 +285,8 @@ class MCTS:
         We then run a Monte Carlo Tree Search using only action sequences and the model
         learned by the network.
         """
+
+        device = torch.device(xm.get_xla_supported_devices(devkind="TPU")[2])
         if override_root_with:
             root = override_root_with
             root_predicted_value = None
@@ -294,7 +296,7 @@ class MCTS:
                 torch.tensor(observation)
                 .float()
                 .unsqueeze(0)
-                .to(self.device)
+                .to(device)
                 # .to(next(model.parameters()).device)
             )
             (
