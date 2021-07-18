@@ -148,9 +148,9 @@ class MuZero:
             num_gpus_per_worker = 0
 
         # Initialize workers
-        self.training_worker = trainer.Trainer.options(
-            num_cpus=0, num_gpus=num_gpus_per_worker if self.config.train_on_gpu else 0,
-        ).remote(self.checkpoint, self.config)
+
+        # we only store the storage worker and replay buffer as instance variables because
+        # we don't need references to reanalyse, trainer, or self-play
 
         self.shared_storage_worker = shared_storage.SharedStorage.remote(
             self.checkpoint, self.config,
@@ -161,36 +161,23 @@ class MuZero:
             self.checkpoint, self.replay_buffer, self.config
         )
 
-        if self.config.use_last_model_value:
-            self.reanalyse_worker = replay_buffer.Reanalyse.options(
-                num_cpus=0,
-                num_gpus=num_gpus_per_worker if self.config.reanalyse_on_gpu else 0,
-            ).remote(self.checkpoint, self.config)
+        # order: start self-play, then trainer, then reanalyse (if at all)
+        # TODO: import these
+        self.self_play_worker = wrappers.SelfPlayWrapper.options().remote()
+        self.self_play_worker.run.remote(
+            num_gpus_per_worker, self.config, self.checkpoint, self.Game, self.shared_storage_worker, self.replay_buffer_worker
+            )
 
-        self.self_play_workers = [
-            self_play.SelfPlay.options(
-                num_cpus=0,
-                num_gpus=num_gpus_per_worker if self.config.selfplay_on_gpu else 0,
-            ).remote(
-                self.checkpoint, self.Game, self.config, self.config.seed + seed,
+        self.trainer_worker = wrappers.TrainerWrapper.options().remote()
+        self.training_worker.run.remote(
+            self.config, self.checkpoint, self.shared_storage_worker, self.replay_buffer_worker
             )
-            for seed in range(self.config.num_workers)
-        ]
-
-        # Launch workers
-        [
-            self_play_worker.continuous_self_play.remote(
-                self.shared_storage_worker, self.replay_buffer_worker
-            )
-            for self_play_worker in self.self_play_workers
-        ]
-        self.training_worker.continuous_update_weights.remote(
-            self.replay_buffer_worker, self.shared_storage_worker
-        )
+        
         if self.config.use_last_model_value:
-            self.reanalyse_worker.reanalyse.remote(
-                self.replay_buffer_worker, self.shared_storage_worker
-            )
+            self.reanalyse_worker = wrappers.ReanalyseWrapper.options().remote()
+            self.reanalyse_worker.run(
+                self.config, self.checkpoint, self.shared_storage_worker, self.replay_buffer_worker
+                )
 
         if log_in_tensorboard:
             self.logging_loop(
@@ -202,16 +189,10 @@ class MuZero:
         Keep track of the training performance.
         """
         # Launch the test worker to get performance metrics
-        self.test_worker = self_play.SelfPlay.options(
-            num_cpus=0, num_gpus=num_gpus,
-        ).remote(
-            self.checkpoint,
-            self.Game,
-            self.config,
-            self.config.seed + self.config.num_workers,
-        )
-        self.test_worker.continuous_self_play.remote(
-            self.shared_storage_worker, None, True
+        self.test_worker = wrappers.SelfPlayWrapper.options().remote()
+        self.test_worker.run(
+            # we don't pass in the replay buffer worker b/c shouldn't need it
+            num_gpus_per_worker, self.config, self.checkpoint, self.Game, self.shared_storage_worker, None, test_mode=True
         )
 
         # Write everything in TensorBoard
@@ -365,6 +346,8 @@ class MuZero:
         """
         opponent = opponent if opponent else self.config.opponent
         muzero_player = muzero_player if muzero_player else self.config.muzero_player
+        
+        # TODO: migrate to use wrapper (TPU)
         self_play_worker = self_play.SelfPlay.options(
             num_cpus=0, num_gpus=num_gpus,
         ).remote(self.checkpoint, self.Game, self.config, numpy.random.randint(10000))
@@ -457,6 +440,7 @@ class MuZero:
 @ray.remote(num_cpus=0, num_gpus=0)
 class CPUActor:
     # Trick to force DataParallel to stay on CPU to get weights on CPU even if there is a GPU
+    # this shouldn't need to be migrated
     def __init__(self):
         pass
 
@@ -609,6 +593,7 @@ if __name__ == "__main__":
         for i in range(len(games)):
             print(f"{i}. {games[i]}")
         choice = input("Enter a number to choose the game: ")
+        # choice = str(2)
         valid_inputs = [str(i) for i in range(len(games))]
         while choice not in valid_inputs:
             choice = input("Invalid input, enter a number listed above: ")
@@ -635,6 +620,7 @@ if __name__ == "__main__":
                 print(f"{i}. {options[i]}")
 
             choice = input("Enter a number to choose an action: ")
+            # choice = str(0)
             valid_inputs = [str(i) for i in range(len(options))]
             while choice not in valid_inputs:
                 choice = input("Invalid input, enter a number listed above: ")
