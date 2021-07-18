@@ -287,7 +287,7 @@ class MCTS:
         learned by the network.
         """
 
-        device = torch.device(xm.get_xla_supported_devices(devkind="TPU")[2])
+        device = torch.device("xla:2")
         if override_root_with:
             root = override_root_with
             root_predicted_value = None
