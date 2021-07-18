@@ -12,7 +12,7 @@ import torch_xla
 import torch_xla.core.xla_model as xm
 
 
-@ray.remote
+# @ray.remote
 class Trainer:
     """
     Class which run in a dedicated thread to train a neural network and save it
@@ -30,12 +30,13 @@ class Trainer:
         self.model = models.MuZeroNetwork(self.config)
         self.model.set_weights(copy.deepcopy(initial_checkpoint["weights"]))
         # self.model.to(torch.device("cuda" if self.config.train_on_gpu else "cpu"))
-        self.model.to(xm.xla_device()) # TPU
+        # self.model.to(xm.xla_device()) # TPU
+        self.model.to(torch.device("cpu"))
         self.model.train()
 
         self.training_step = initial_checkpoint["training_step"]
 
-        print("You are training on TPU:", xm.xla_device())
+        # print("You are training on TPU:", xm.xla_device())
         # if "cuda" not in str(next(self.model.parameters()).device):
             # print("You are not training on GPU.\n")
 

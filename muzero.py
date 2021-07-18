@@ -13,6 +13,7 @@ import ray
 import torch
 from torch.utils.tensorboard import SummaryWriter
 
+import wrappers
 import diagnose_model
 import models
 import replay_buffer
@@ -169,13 +170,13 @@ class MuZero:
             )
 
         self.trainer_worker = wrappers.TrainerWrapper.options().remote()
-        self.training_worker.run.remote(
+        self.trainer_worker.run.remote(
             self.config, self.checkpoint, self.shared_storage_worker, self.replay_buffer_worker
             )
         
         if self.config.use_last_model_value:
             self.reanalyse_worker = wrappers.ReanalyseWrapper.options().remote()
-            self.reanalyse_worker.run(
+            self.reanalyse_worker.run.remote(
                 self.config, self.checkpoint, self.shared_storage_worker, self.replay_buffer_worker
                 )
 
@@ -189,11 +190,11 @@ class MuZero:
         Keep track of the training performance.
         """
         # Launch the test worker to get performance metrics
-        self.test_worker = wrappers.SelfPlayWrapper.options().remote()
-        self.test_worker.run(
+        # self.test_worker = wrappers.SelfPlayWrapper.options().remote()
+        # self.test_worker.run.remote(
             # we don't pass in the replay buffer worker b/c shouldn't need it
-            num_gpus_per_worker, self.config, self.checkpoint, self.Game, self.shared_storage_worker, None, test_mode=True
-        )
+        #     num_gpus, self.config, self.checkpoint, self.Game, self.shared_storage_worker, None, test_mode=True
+        # )
 
         # Write everything in TensorBoard
         writer = SummaryWriter(self.config.results_path)

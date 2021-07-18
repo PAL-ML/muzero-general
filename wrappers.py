@@ -18,11 +18,11 @@ import trainer
 
 
 # arguments for xmp.spawn 
-N_PROC = 8
+N_PROC = 1
 START_METHOD = "fork"
 
 
-@ray.remote(resources={'tpu': 1})
+@ray.remote
 class SelfPlayWrapper():
 	# does this actually need an init? no right?
 
@@ -33,7 +33,7 @@ class SelfPlayWrapper():
 		self_play_worker = self_play.SelfPlay(checkpoint, game, config, config.seed)
 		
 		# i think this will make it wait for every worker to instantiate before it starts runs
-		xm.rendezvous('init')
+		# xm.rendezvous('init')
 
 		if test_mode:
 			self_play_worker.continuous_self_play(shared_storage_worker, None, True)
@@ -41,39 +41,43 @@ class SelfPlayWrapper():
 			self_play_worker.continuous_self_play(shared_storage_worker, replay_buffer_worker)
 
 	def run(self, num_gpus_per_worker, config, checkpoint, game, shared_storage_worker, replay_buffer_worker, test_mode=False):
-		xmp.spawn(
-			self._map_fn, 
-			args=(num_gpus_per_worker, config, checkpoint, game, shared_storage_worker, replay_buffer_worker, test_mode), 
-			nprocs= test_mode ? 1 : N_PROC, # if it's for the logging loop, we only want one
-			start_method=START_METHOD
-			)
+                if test_mode:
+	                self._map_fn(0, num_gpus_per_worker, config, checkpoint, game, shared_storage_worker, replay_buffer_worker, test_mode)
+                else:
+                        xmp.spawn(
+			    self._map_fn, 
+		    	    args=(num_gpus_per_worker, config, checkpoint, game, shared_storage_worker, replay_buffer_worker, test_mode), 
+			    nprocs= 1 if test_mode else  N_PROC, # if it's for the logging loop, we only want one
+			    start_method=START_METHOD
+			    )
 
-@ray.remote(resources={'tpu': 1})
+@ray.remote
 class TrainerWrapper():
 	@staticmethod
 	def _map_fn(index, config, checkpoint, shared_storage_worker, replay_buffer_worker):
 		training_worker = trainer.Trainer(checkpoint, config)
 
 		# i think this will make it wait for every worker to instantiate before it starts runs
-		xm.rendezvous('init')
+		# xm.rendezvous('init')
 
-		training_worker.continuous_update_weights.remote(
+		training_worker.continuous_update_weights(
 			replay_buffer_worker, shared_storage_worker
 		)
 
 	def run(self, config, checkpoint, shared_storage_worker, replay_buffer_worker):
-		xmp.spawn(self._map_fn, args=(config, checkpoint, shared_storage_worker, replay_buffer_worker), nprocs=N_PROC, start_method=START_METHOD)
+                # self._map_fn(0, config, checkpoint, shared_storage_worker, replay_buffer_worker)
+	        xmp.spawn(self._map_fn, args=(config, checkpoint, shared_storage_worker, replay_buffer_worker), nprocs=N_PROC, start_method=START_METHOD)
 
-@ray.remote(resources={'tpu': 1})
+@ray.remote
 class ReanalyseWrapper():
 	@staticmethod
 	def _map_fn(index, config, checkpoint, shared_storage_worker, replay_buffer_worker):
 		reanalyse_worker = replay_buffer.Reanalyse(self.checkpoint, self.config)
 
 		# i think this will make it wait for every worker to instantiate before it starts runs
-		xm.rendezvous('init')
+		# xm.rendezvous('init')
 
-		reanalyse_worker.reanalyse.remote(
+		reanalyse_worker.reanalyse(
 			replay_buffer_worker, shared_storage_worker
 		)
 

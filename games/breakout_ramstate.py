@@ -28,7 +28,8 @@ class MuZeroConfig:
 
         ### Game
         self.observation_shape = (1, 1, 128)  # Dimensions of the game observation, must be 3D (channel, height, width). For a 1D array, please reshape it to (1, 1, length of array)
-        self.action_space = [0,1,3,4]
+        # self.action_space = [0,1,3,4]
+        self.action_space = list(range(5))
         # self.action_space = list(range(4))  # Fixed list of all possible actions. You should only edit the length
         self.players = list(range(1))  # List of players. You should only edit the length
         self.stacked_observations = 0  # Number of previous observations and previous actions to add to the current observation
@@ -59,6 +60,8 @@ class MuZeroConfig:
 
         ### Network
         self.network = "fullyconnected"  # "resnet" / "fullyconnected"
+
+        # sqrt(max(abs(discounted reward))) ~= 29.47; should we make support size bigger?
         self.support_size = 10  # Value and reward are scaled (with almost sqrt) and encoded on a vector with a range of -support_size to support_size. Choose it so that support_size <= sqrt(max(abs(discounted reward)))
 
         # Residual Network - all irrelevant
@@ -145,8 +148,14 @@ class Game(AbstractGame):
 
     def __init__(self, seed=None):
         self.env = gym.make("Breakout-v4", obs_type="ram",full_action_space=True)
+        # self.true_action_space = [0,1,3,4]
         if seed is not None:
             self.env.seed(seed)
+
+
+    # shouldn't need this function anymore
+    # def _translate_action(self, action):
+    #     return self.true_action_space[action]
 
     def step(self, action):
         """
@@ -158,7 +167,11 @@ class Game(AbstractGame):
         Returns:
             The new observation, the reward and a boolean if the game has ended.
         """
-        observation, reward, done, _ = self.env.step(action)
+        observation, reward, done, _ = self.env.step(
+            action
+            # self._translate_action(action)
+            )
+        # print(observation.shape)
         observation = numpy.reshape(observation, (1,1,128))
         # observation = cv2.resize(observation, (96, 96), interpolation=cv2.INTER_AREA)
         # observation = numpy.asarray(observation, dtype="float32") / 255.0
@@ -176,8 +189,8 @@ class Game(AbstractGame):
         Returns:
             An array of integers, subset of the action space.
         """
-        return [0,1,3,4]
-        # return list(range(4))
+        # return [0,1,3,4]
+        return list(range(5))
 
     def reset(self):
         """

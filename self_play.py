@@ -12,13 +12,14 @@ import torch_xla
 import torch_xla.core.xla_model as xm
 
 
-@ray.remote
+# @ray.remote
 class SelfPlay:
     """
     Class which run in a dedicated thread to play games and save them to the replay-buffer.
     """
 
     def __init__(self, initial_checkpoint, Game, config, seed):
+        print("starting a selfplay")
         self.config = config
         self.game = Game(seed)
 
@@ -31,9 +32,12 @@ class SelfPlay:
         self.model.set_weights(initial_checkpoint["weights"])
         # self.model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
         self.model.to(xm.xla_device()) # TPU
+        #self.model.to(torch.device("cpu"))
         self.model.eval()
+        print("selfplay ready to GO")
 
     def continuous_self_play(self, shared_storage, replay_buffer, test_mode=False):
+        print("inselfplay, testmode", test_mode)
         while ray.get(
             shared_storage.get_info.remote("training_step")
         ) < self.config.training_steps and not ray.get(
