@@ -165,8 +165,15 @@ class MuZero:
         # order: start self-play, then trainer, then reanalyse (if at all)
         # TODO: import these
 
-        wrappers.runSelfPlayWrapped.remote(self.checkpoint, self.Game, self.config)
-        wrappers.runTrainerWrapper.remote(self.checkpoint, self.config)
+        canLoadTrainer = False
+        
+        def hook(x):
+            canLoadTrainer = x
+        def fetch():
+            return canLoadTrainer
+
+        wrappers.runSelfPlayWrapped.remote(self.checkpoint, self.Game, self.config, hook)
+        wrappers.runTrainerWrapper.remote(self.checkpoint, self.config, fetch)
 
         # MIGHT NEED to instantiate the model separate from running continuous....
 

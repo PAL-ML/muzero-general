@@ -10,7 +10,7 @@ import torch_xla
 import torch_xla.core.xla_model as xm
 import torch_xla.distributed.xla_multiprocessing as xmp
 
-from abc import ABC
+import time
 
 import replay_buffer
 import self_play
@@ -25,13 +25,12 @@ START_METHOD = "fork"
 
 
 @ray.remote
-def runSelfPlayWrapped(checkpoint, game, config):
+def runSelfPlayWrapped(checkpoint, game, config, hook):
 	# TODO: logging loop!
 
 	def map_fn(index):
 		self_play_worker = self_play.SelfPlay(checkpoint, game, config, config.seed)
-		xm.rendezvous("selfplay.done")
-		print("SELF PLAY FUCK YES")
+		hook(True)
 
 	xmp.spawn(
 		map_fn,
@@ -41,11 +40,21 @@ def runSelfPlayWrapped(checkpoint, game, config):
 		)
 
 @ray.remote
-def runTrainerWrapper(checkpoint, config):
+def runTrainerWrapper(checkpoint, config, fetch):
 	# TODO: logging loop!
 
 	def map_fn(index):
-		xm.rendezvous("selfplay.done")
+		c = 0
+
+		while not fetch() and c < 30:
+			print(f"fetch false, sleeping ({c})")
+			time.sleep(2)
+			c += 1
+
+		if not fetch():
+			raise Exception("Timeout while waiting for hook to hook heh")
+
+		print("starting trainer")
 		training_worker = trainer.Trainer(checkpoint, config)
 		print("TRAINER FUCK YES")
 
