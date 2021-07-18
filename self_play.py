@@ -38,7 +38,6 @@ class SelfPlay:
         self.model.to(xm.xla_device()) # TPU
         #self.model.to(torch.device("cpu"))
         self.model.eval()
-        print("selfplay ready to GO")
 
     def continuous_self_play(self, shared_storage, replay_buffer, test_mode=False):
         print("inselfplay, testmode", test_mode)

@@ -89,8 +89,7 @@ class MuZero:
         if 1 < self.num_gpus:
             self.num_gpus = math.floor(self.num_gpus)
 
-        ray.init(num_gpus=total_gpus, ignore_reinit_error=True)
-
+        # ray.init(num_gpus=total_gpus, ignore_reinit_error=True)
         # Checkpoint and replay buffer used to initialize workers
         self.checkpoint = {
             "weights": None,
@@ -165,17 +164,21 @@ class MuZero:
         # order: start self-play, then trainer, then reanalyse (if at all)
         # TODO: import these
 
+        wrappers.runSelfPlayWrapped(self.checkpoint, self.Game, self.config)
+        wrappers.runTrainerWrapper(self.checkpoint, self.config)
+
         # MIGHT NEED to instantiate the model separate from running continuous....
-        self.self_play_worker = wrappers.SelfPlayWrapper.options().remote()
-        self.trainer_worker = wrappers.TrainerWrapper.options().remote()
 
-        self.self_play_worker.run.remote(
-            num_gpus_per_worker, self.config, self.checkpoint, self.Game, self.shared_storage_worker, self.replay_buffer_worker
-            )
+        # self.self_play_worker = wrappers.SelfPlayWrapper.options().remote()
+        # self.trainer_worker = wrappers.TrainerWrapper.options().remote()
 
-        self.trainer_worker.run.remote(
-            self.config, self.checkpoint, self.shared_storage_worker, self.replay_buffer_worker
-            )
+        # self.self_play_worker.run.remote(
+        #     num_gpus_per_worker, self.config, self.checkpoint, self.Game, self.shared_storage_worker, self.replay_buffer_worker
+        #     )
+
+        # self.trainer_worker.run.remote(
+        #     self.config, self.checkpoint, self.shared_storage_worker, self.replay_buffer_worker
+        #     )
         
         if self.config.use_last_model_value:
             self.reanalyse_worker = wrappers.ReanalyseWrapper.options().remote()

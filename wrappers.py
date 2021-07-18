@@ -25,6 +25,36 @@ START_METHOD = "fork"
 
 
 @ray.remote
+def runSelfPlayWrapped(checkpoint, game, config):
+	# TODO: logging loop!
+
+	def map_fn(index):
+		self_play_worker = self_play.SelfPlay(checkpoint, game, config, config.seed)
+		print("SELF PLAY FUCK YES")
+
+	xmp.spawn(
+		map_fn,
+		args=(),
+		nprocs=N_PROC,
+		start_method=START_METHOD
+		)
+
+@ray.remote
+def runTrainerWrapper(checkpoint, config):
+	# TODO: logging loop!
+
+	def map_fn(index):
+		training_worker = trainer.Trainer(checkpoint, config)
+		print("TRAINER FUCK YES")
+
+	xmp.spawn(
+		map_fn,
+		args=(),
+		nprocs=N_PROC,
+		start_method=START_METHOD
+		)
+
+
 class SelfPlayWrapper():
 	# does this actually need an init? no right?
 
