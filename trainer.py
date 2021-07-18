@@ -27,7 +27,8 @@ class Trainer:
         torch.manual_seed(self.config.seed)
 
 
-        self.device = torch.device(xm.get_xla_supported_devices(devkind="TPU")[0])
+        # self.device = torch.device(xm.get_xla_supported_devices(devkind="TPU")[0])
+        self.device = torch.device("xla:3")
 
         # Initialize the network
         self.model = models.MuZeroNetwork(self.config)

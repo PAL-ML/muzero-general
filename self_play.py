@@ -27,7 +27,8 @@ class SelfPlay:
         numpy.random.seed(seed)
         torch.manual_seed(seed)
 
-        self.device = torch.device(xm.get_xla_supported_devices(devkind="TPU")[2])
+        # self.device = torch.device(xm.get_xla_supported_devices(devkind="TPU")[2])
+        self.device = torch.device("xla:2")
 
         # Initialize the network
         self.model = models.MuZeroNetwork(self.config)
@@ -354,7 +355,7 @@ class MCTS:
             parent = search_path[-2]
             value, reward, policy_logits, hidden_state = model.recurrent_inference(
                 parent.hidden_state,
-                torch.tensor([[action]]).to(self.device),
+                torch.tensor([[action]]).to(device),
                 # torch.tensor([[action]]).to(parent.hidden_state.device),
             )
             value = models.support_to_scalar(value, self.config.support_size).item()
