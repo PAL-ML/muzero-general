@@ -25,12 +25,12 @@ START_METHOD = "fork"
 
 
 @ray.remote
-def runSelfPlayWrapped(checkpoint, game, config, hook):
+def runSelfPlayWrapped(checkpoint, game, config, shared_storage_worker):
 	# TODO: logging loop!
 
 	def map_fn(index):
 		self_play_worker = self_play.SelfPlay(checkpoint, game, config, config.seed)
-		hook(True)
+		shared_storage_worker.set_info.remote("trainer_can_start", True)
 		print("self play is done! hook should be true now")
 
 	xmp.spawn(
@@ -41,19 +41,19 @@ def runSelfPlayWrapped(checkpoint, game, config, hook):
 		)
 
 @ray.remote
-def runTrainerWrapper(checkpoint, config, fetch):
+def runTrainerWrapper(checkpoint, config, shared_storage_worker):
 	# TODO: logging loop!
 
 	def map_fn(index):
 		c = 0
 
-		while not fetch() and c < 120:
+		while not ray.get(shared_storage_worker.get_info.remote("trainer_can_start")) and c < 120:
 			print(f"fetch false, sleeping ({c})")
 			time.sleep(10)
 			c += 1
 
-		if not fetch():
-			raise Exception("Timeout while waiting for hook to hook heh")
+		if not ray.get(shared_storage_worker.get_info.remote("trainer_can_start")):
+			raise Exception("Timeout while waiting for hook to yeet rip")
 		else:
 			print("THE HOOK WORKED BABY")
 
