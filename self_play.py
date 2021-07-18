@@ -19,7 +19,6 @@ class SelfPlay:
     """
 
     def __init__(self, initial_checkpoint, Game, config, seed):
-        print("starting a selfplay")
         self.config = config
         self.game = Game(seed)
 
@@ -40,7 +39,6 @@ class SelfPlay:
         self.model.eval()
 
     def continuous_self_play(self, shared_storage, replay_buffer, test_mode=False):
-        print("inselfplay, testmode", test_mode)
         while ray.get(
             shared_storage.get_info.remote("training_step")
         ) < self.config.training_steps and not ray.get(

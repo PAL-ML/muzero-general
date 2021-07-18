@@ -174,22 +174,11 @@ class MuZero:
         def fetch():
             return canLoadTrainer
 
+        # these coordinate between themselves by communicating through the shared_storage_worker
         wrappers.runSelfPlayWrapped.remote(self.checkpoint, self.Game, self.config, self.replay_buffer_worker, self.shared_storage_worker)
         wrappers.runTrainerWrapper.remote(self.checkpoint, self.config, self.replay_buffer_worker, self.shared_storage_worker)
-
-        # MIGHT NEED to instantiate the model separate from running continuous....
-
-        # self.self_play_worker = wrappers.SelfPlayWrapper.options().remote()
-        # self.trainer_worker = wrappers.TrainerWrapper.options().remote()
-
-        # self.self_play_worker.run.remote(
-        #     num_gpus_per_worker, self.config, self.checkpoint, self.Game, self.shared_storage_worker, self.replay_buffer_worker
-        #     )
-
-        # self.trainer_worker.run.remote(
-        #     self.config, self.checkpoint, self.shared_storage_worker, self.replay_buffer_worker
-        #     )
         
+        # todo: get reanalyse working lol
         if self.config.use_last_model_value:
             self.reanalyse_worker = wrappers.ReanalyseWrapper.options().remote()
             self.reanalyse_worker.run.remote(
