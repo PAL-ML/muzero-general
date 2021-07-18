@@ -25,13 +25,19 @@ START_METHOD = "fork"
 
 
 @ray.remote
-def runSelfPlayWrapped(checkpoint, game, config, shared_storage_worker):
+def runSelfPlayWrapped(checkpoint, game, config, replay_buffer_worker, shared_storage_worker):
 	# TODO: logging loop!
 
 	def map_fn(index):
 		self_play_worker = self_play.SelfPlay(checkpoint, game, config, config.seed)
+
+		# when we have multiple self-play workers, we'll want this to happen only when all of them
+		# are ready. we can achieve that using rendezvous and taking advantage of spawn's blocking 
 		shared_storage_worker.set_info.remote("trainer_can_start", True)
 		print("self play is done! hook should be true now")
+
+		self_play_worker.continuous_self_play(shared_storage_worker, replay_buffer_worker)
+
 
 	xmp.spawn(
 		map_fn,
@@ -41,7 +47,7 @@ def runSelfPlayWrapped(checkpoint, game, config, shared_storage_worker):
 		)
 
 @ray.remote
-def runTrainerWrapper(checkpoint, config, shared_storage_worker):
+def runTrainerWrapper(checkpoint, config, replay_buffer_worker, shared_storage_worker):
 	# TODO: logging loop!
 
 	def map_fn(index):
@@ -60,6 +66,12 @@ def runTrainerWrapper(checkpoint, config, shared_storage_worker):
 		print("starting trainer")
 		training_worker = trainer.Trainer(checkpoint, config)
 		print("TRAINER FUCK YES")
+
+		training_worker.continuous_update_weights(
+			replay_buffer_worker, shared_storage_worker
+		)
+
+
 
 	xmp.spawn(
 		map_fn,

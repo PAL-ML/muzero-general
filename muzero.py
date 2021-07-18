@@ -174,8 +174,8 @@ class MuZero:
         def fetch():
             return canLoadTrainer
 
-        wrappers.runSelfPlayWrapped.remote(self.checkpoint, self.Game, self.config, self.shared_storage_worker)
-        wrappers.runTrainerWrapper.remote(self.checkpoint, self.config, self.shared_storage_worker)
+        wrappers.runSelfPlayWrapped.remote(self.checkpoint, self.Game, self.config, self.replay_buffer_worker, self.shared_storage_worker)
+        wrappers.runTrainerWrapper.remote(self.checkpoint, self.config, self.replay_buffer_worker, self.shared_storage_worker)
 
         # MIGHT NEED to instantiate the model separate from running continuous....
 
