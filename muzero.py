@@ -164,12 +164,15 @@ class MuZero:
 
         # order: start self-play, then trainer, then reanalyse (if at all)
         # TODO: import these
+
+        # MIGHT NEED to instantiate the model separate from running continuous....
         self.self_play_worker = wrappers.SelfPlayWrapper.options().remote()
+        self.trainer_worker = wrappers.TrainerWrapper.options().remote()
+
         self.self_play_worker.run.remote(
             num_gpus_per_worker, self.config, self.checkpoint, self.Game, self.shared_storage_worker, self.replay_buffer_worker
             )
 
-        self.trainer_worker = wrappers.TrainerWrapper.options().remote()
         self.trainer_worker.run.remote(
             self.config, self.checkpoint, self.shared_storage_worker, self.replay_buffer_worker
             )
