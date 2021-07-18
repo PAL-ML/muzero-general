@@ -31,6 +31,7 @@ def runSelfPlayWrapped(checkpoint, game, config, hook):
 	def map_fn(index):
 		self_play_worker = self_play.SelfPlay(checkpoint, game, config, config.seed)
 		hook(True)
+		print("self play is done! hook should be true now")
 
 	xmp.spawn(
 		map_fn,
@@ -48,7 +49,7 @@ def runTrainerWrapper(checkpoint, config, fetch):
 
 		while not fetch() and c < 120:
 			print(f"fetch false, sleeping ({c})")
-			time.sleep(4)
+			time.sleep(10)
 			c += 1
 
 		if not fetch():
