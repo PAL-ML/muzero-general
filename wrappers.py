@@ -16,6 +16,8 @@ import replay_buffer
 import self_play
 import trainer
 
+import models
+
 
 # arguments for xmp.spawn 
 N_PROC = 1
@@ -30,15 +32,21 @@ class SelfPlayWrapper():
 	def _map_fn(index, num_gpus_per_worker, config, checkpoint, game, shared_storage_worker, replay_buffer_worker, test_mode):
 		# so we it should only spawn one here right? since spawn is taking care of creating more
 		# than one process
-		self_play_worker = self_play.SelfPlay(checkpoint, game, config, config.seed)
+		# self_play_worker = self_play.SelfPlay(checkpoint, game, config, config.seed)
 		
 		# i think this will make it wait for every worker to instantiate before it starts runs
 		# xm.rendezvous('init')
 
-		if test_mode:
-			self_play_worker.continuous_self_play(shared_storage_worker, None, True)
-		else:
-			self_play_worker.continuous_self_play(shared_storage_worker, replay_buffer_worker)
+		model = models.MuZeroNetwork(config)
+		model.set_weights(checkpoint["weights"])
+		# self.model.to(self.device)
+		# self.model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+		model.to(xm.xla_device()) # TPU
+
+		# if test_mode:
+		# 	self_play_worker.continuous_self_play(shared_storage_worker, None, True)
+		# else:
+		# 	self_play_worker.continuous_self_play(shared_storage_worker, replay_buffer_worker)
 
 	def run(self, num_gpus_per_worker, config, checkpoint, game, shared_storage_worker, replay_buffer_worker, test_mode=False):
                 if test_mode: # True
@@ -55,14 +63,18 @@ class SelfPlayWrapper():
 class TrainerWrapper():
 	@staticmethod
 	def _map_fn(index, config, checkpoint, shared_storage_worker, replay_buffer_worker):
-		training_worker = trainer.Trainer(checkpoint, config)
+		# training_worker = trainer.Trainer(checkpoint, config)
+		model = models.MuZeroNetwork(config)
+		model.set_weights(copy.deepcopy(checkpoint["weights"]))
+		# self.model.to(torch.device("cuda" if self.config.train_on_gpu else "cpu"))
+		model.to(xm.xla_device()) # TPU
 
 		# i think this will make it wait for every worker to instantiate before it starts runs
 		# xm.rendezvous('init')
 
-		training_worker.continuous_update_weights(
-			replay_buffer_worker, shared_storage_worker
-		)
+		# training_worker.continuous_update_weights(
+		# 	replay_buffer_worker, shared_storage_worker
+		# )
 
 	def run(self, config, checkpoint, shared_storage_worker, replay_buffer_worker):
                 # self._map_fn(0, config, checkpoint, shared_storage_worker, replay_buffer_worker)
