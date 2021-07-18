@@ -41,7 +41,7 @@ class SelfPlayWrapper():
 			self_play_worker.continuous_self_play(shared_storage_worker, replay_buffer_worker)
 
 	def run(self, num_gpus_per_worker, config, checkpoint, game, shared_storage_worker, replay_buffer_worker, test_mode=False):
-                if True: # test_mode:
+                if test_mode: # True
 	                self._map_fn(0, num_gpus_per_worker, config, checkpoint, game, shared_storage_worker, replay_buffer_worker, test_mode)
                 else:
                         xmp.spawn(
@@ -65,8 +65,8 @@ class TrainerWrapper():
 		)
 
 	def run(self, config, checkpoint, shared_storage_worker, replay_buffer_worker):
-                self._map_fn(0, config, checkpoint, shared_storage_worker, replay_buffer_worker)
-	        # xmp.spawn(self._map_fn, args=(config, checkpoint, shared_storage_worker, replay_buffer_worker), nprocs=N_PROC, start_method=START_METHOD)
+                # self._map_fn(0, config, checkpoint, shared_storage_worker, replay_buffer_worker)
+	        xmp.spawn(self._map_fn, args=(config, checkpoint, shared_storage_worker, replay_buffer_worker), nprocs=N_PROC, start_method=START_METHOD)
 
 @ray.remote
 class ReanalyseWrapper():

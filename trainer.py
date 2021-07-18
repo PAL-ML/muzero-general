@@ -28,15 +28,15 @@ class Trainer:
 
 
         # self.device = torch.device(xm.get_xla_supported_devices(devkind="TPU")[0])
-        self.device = torch.device("xla:3")
+        # self.device = torch.device("xla:3")
 
         # Initialize the network
         self.model = models.MuZeroNetwork(self.config)
         self.model.set_weights(copy.deepcopy(initial_checkpoint["weights"]))
         # self.model.to(torch.device("cuda" if self.config.train_on_gpu else "cpu"))
-        # self.model.to(xm.xla_device()) # TPU
+        self.model.to(xm.xla_device()) # TPU
         # self.model.to(torch.device("cpu"))
-        self.model.to(self.device)
+        # self.model.to(self.device)
         self.model.train()
 
         self.training_step = initial_checkpoint["training_step"]
@@ -152,8 +152,8 @@ class Trainer:
         target_value_scalar = numpy.array(target_value, dtype="float32")
         priorities = numpy.zeros_like(target_value_scalar)
 
-        # device = next(self.model.parameters()).device
-        device = self.device
+        device = next(self.model.parameters()).device
+        # device = self.device
         if self.config.PER:
             weight_batch = torch.tensor(weight_batch.copy()).float().to(device)
         observation_batch = torch.tensor(observation_batch).float().to(device)
