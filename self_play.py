@@ -45,8 +45,8 @@ class SelfPlay:
         ) < self.config.training_steps and not ray.get(
             shared_storage.get_info.remote("terminate")
         ):
-        	print("playloop start")
             self.model.set_weights(ray.get(shared_storage.get_info.remote("weights")))
+            print("playloop start")
 
             if not test_mode:
                 game_history = self.play_game(
