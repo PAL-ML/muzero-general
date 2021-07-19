@@ -171,6 +171,7 @@ class MuZeroFullyConnectedNetwork(AbstractNetwork):
 
     def initial_inference(self, observation):
         print("initial inference running")
+        print("observation: ", type(observation), observation.shape)
         encoded_state = self.representation(observation)
         policy_logits, value = self.prediction(encoded_state)
         # reward equal to 0 for consistency

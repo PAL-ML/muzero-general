@@ -116,9 +116,9 @@ class SelfPlay:
                     and not ray.get(shared_storage.get_info.remote("terminate"))
                 ):
                     time.sleep(0.5)
-
+            print("playloop end")
         self.close_game()
-        print("playloop end")
+        
 
     def play_game(
         self, temperature, temperature_threshold, render, opponent, muzero_player
