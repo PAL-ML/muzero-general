@@ -170,6 +170,7 @@ class MuZeroFullyConnectedNetwork(AbstractNetwork):
         return next_encoded_state_normalized, reward
 
     def initial_inference(self, observation):
+    	print("initial inference running")
         encoded_state = self.representation(observation)
         policy_logits, value = self.prediction(encoded_state)
         # reward equal to 0 for consistency
@@ -181,7 +182,7 @@ class MuZeroFullyConnectedNetwork(AbstractNetwork):
                 .to(observation.device)
             )
         )
-
+		print("initial inference was successful!")
         return (
             value,
             reward,

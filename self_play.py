@@ -39,11 +39,13 @@ class SelfPlay:
         self.model.eval()
 
     def continuous_self_play(self, shared_storage, replay_buffer, test_mode=False):
+    	print("playloop before")
         while ray.get(
             shared_storage.get_info.remote("training_step")
         ) < self.config.training_steps and not ray.get(
             shared_storage.get_info.remote("terminate")
         ):
+        	print("playloop start")
             self.model.set_weights(ray.get(shared_storage.get_info.remote("weights")))
 
             if not test_mode:
@@ -116,6 +118,7 @@ class SelfPlay:
                     time.sleep(0.5)
 
         self.close_game()
+        print("playloop end")
 
     def play_game(
         self, temperature, temperature_threshold, render, opponent, muzero_player
