@@ -30,12 +30,15 @@ def runSelfPlayWrapped(checkpoint, game, config, replay_buffer_worker, shared_st
 	# TODO: logging loop!
 
 	def map_fn(index):
+	  print("selfplay instantiation begins")
 		self_play_worker = self_play.SelfPlay(checkpoint, game, config, config.seed)
+		print("selfplay instantiation begins")
 
 		# when we have multiple self-play workers, we'll want this to happen only when all of them
 		# are ready. we can achieve that using rendezvous and taking advantage of spawn's blocking 
 		shared_storage_worker.set_info.remote("trainer_can_start", True)
 		
+		print("selfplay continuous beginning")
 		self_play_worker.continuous_self_play(shared_storage_worker, replay_buffer_worker)
 
 	xmp.spawn(
@@ -57,8 +60,10 @@ def runTrainerWrapper(checkpoint, config, replay_buffer_worker, shared_storage_w
 
 		if not ray.get(shared_storage_worker.get_info.remote("trainer_can_start")):
 			raise Exception("Timeout while waiting for hook to yeet rip")
-
+    
+    print("trainer instantiation begins")
 		training_worker = trainer.Trainer(checkpoint, config)
+		print("trainer instantiation done! starting weight updates")
 		training_worker.continuous_update_weights(
 			replay_buffer_worker, shared_storage_worker
 		)
