@@ -61,7 +61,7 @@ def runTrainerWrapper(checkpoint, config, replay_buffer_worker, shared_storage_w
 		if not ray.get(shared_storage_worker.get_info.remote("trainer_can_start")):
 			raise Exception("Timeout while waiting for hook to yeet rip")
     
-    	print("trainer instantiation begins")
+		print("trainer instantiation begins")
 		training_worker = trainer.Trainer(checkpoint, config)
 		print("trainer instantiation done! starting weight updates")
 		training_worker.continuous_update_weights(
