@@ -20,8 +20,31 @@ import models
 
 
 # arguments for xmp.spawn 
-N_PROC = 1
+N_PROC = 8
 START_METHOD = "fork"
+
+
+
+
+# @ray.remote()
+# def stonks():
+# 	def map_fn(index):
+
+# 		# start the trainer
+# 		if xm.is_master_ordinal():
+# 			xm.rendezvous("selfplay_is_loaded")
+# 			training_worker = trainer.Trainer(checkpoint, config)
+
+# 			pass # do training stuff here
+
+# 		# start the self-play workers
+# 		if not xm.is_master_ordinal():
+# 			pass # do self-play stuff
+
+
+
+
+
 
 # TODO: refactor these names to something more logical
 @ray.remote
