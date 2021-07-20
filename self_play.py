@@ -135,8 +135,6 @@ class SelfPlay:
         game_history.reward_history.append(0)
         game_history.to_play_history.append(self.game.to_play())
 
-        # observation = torch.tensor(observation).float().to(device)
-
         done = False
 
         if render:

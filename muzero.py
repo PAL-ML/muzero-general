@@ -165,13 +165,10 @@ class MuZero:
         )
 
         # order: start self-play, then trainer, then reanalyse (if at all)
-        # TODO: import these
-
-        wrappers.stonks.remote(self.checkpoint, self.Game, self.config, self.replay_buffer_worker, self.shared_storage_worker)
 
         # these coordinate between themselves by communicating through the shared_storage_worker
-        # wrappers.runSelfPlayWrapped.remote(self.checkpoint, self.Game, self.config, self.replay_buffer_worker, self.shared_storage_worker)
-        # wrappers.runTrainerWrapper.remote(self.checkpoint, self.config, self.replay_buffer_worker, self.shared_storage_worker)
+        wrappers.runSelfPlayWrapped.remote(self.checkpoint, self.Game, self.config, self.replay_buffer_worker, self.shared_storage_worker)
+        wrappers.runTrainerWrapper.remote(self.checkpoint, self.config, self.replay_buffer_worker, self.shared_storage_worker)
         
         # todo: get reanalyse working lol
         if self.config.use_last_model_value:
