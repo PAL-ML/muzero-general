@@ -99,4 +99,3 @@ inside simple_map_fn, we want:
 - run the actual training
 """
 
-
