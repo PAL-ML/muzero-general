@@ -41,12 +41,14 @@ def runSelfPlayWrapped(checkpoint, game, config, replay_buffer_worker, shared_st
 		print("selfplay continuous beginning")
 		self_play_worker.continuous_self_play(shared_storage_worker, replay_buffer_worker)
 
-	xmp.spawn(
-		map_fn,
-		args=(),
-		nprocs=N_PROC,
-		start_method=START_METHOD
-		)
+	map_fn(None)
+
+	# xmp.spawn(
+	# 	map_fn,
+	# 	args=(),
+	# 	nprocs=N_PROC,
+	# 	start_method=START_METHOD
+	# 	)
 
 @ray.remote
 def runTrainerWrapper(checkpoint, config, replay_buffer_worker, shared_storage_worker):
@@ -68,12 +70,14 @@ def runTrainerWrapper(checkpoint, config, replay_buffer_worker, shared_storage_w
 			replay_buffer_worker, shared_storage_worker
 		)
 
-	xmp.spawn(
-		map_fn,
-		args=(),
-		nprocs=1, 
-		start_method=START_METHOD
-		)
+	map_fn(None)
+
+	# xmp.spawn(
+	# 	map_fn,
+	# 	args=(),
+	# 	nprocs=1, 
+	# 	start_method=START_METHOD
+	# 	)
 
 # TODO: migrate this to a function and generally get it working
 @ray.remote
