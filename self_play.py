@@ -28,7 +28,7 @@ class SelfPlay:
 
         # self.device = torch.device(xm.get_xla_supported_devices(devkind="TPU")[2])
         self.device = xm.xla_device()
-        print("selfplay device:", device)
+        print("selfplay device:", self.device)
 
         # Initialize the network
         self.model = models.MuZeroNetwork(self.config)
