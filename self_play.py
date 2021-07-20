@@ -48,6 +48,7 @@ class SelfPlay:
         ):
             self.model.set_weights(ray.get(shared_storage.get_info.remote("weights")))
             print("playloop start")
+            print("playloop start tensordmp", torch_xla._XLAC._xla_tensors_report(0, str(device)))
 
             if not test_mode:
                 game_history = self.play_game(
@@ -117,6 +118,8 @@ class SelfPlay:
                     and not ray.get(shared_storage.get_info.remote("terminate"))
                 ):
                     time.sleep(0.5)
+
+            print("playloop end tensordmp", torch_xla._XLAC._xla_tensors_report(0, str(device)))
             print("playloop end")
         self.close_game()
         
