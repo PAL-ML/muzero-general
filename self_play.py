@@ -291,7 +291,7 @@ class MCTS:
         """
 
 
-        print("selfplay copying to:", str(next(model.parameters()).device))
+        print("mcts copying to:", str(next(model.parameters()).device))
         # device = torch.device("xla:2")
         if override_root_with:
             root = override_root_with
@@ -311,10 +311,10 @@ class MCTS:
                 policy_logits,
                 hidden_state,
             ) = model.initial_inference(observation)
-            print("root_predicted_value dev", root_predicted_value.device)
-            print("reward dev", reward.device)
-            print("policy_logits dev", policy_logits.device)
-            print("hidden_state dev", hidden_state.device)
+            # print("root_predicted_value dev", root_predicted_value.device)
+            # print("reward dev", reward.device)
+            # print("policy_logits dev", policy_logits.device)
+            # print("hidden_state dev", hidden_state.device)
             root_predicted_value = models.support_to_scalar(
                 root_predicted_value, self.config.support_size
             ).item()

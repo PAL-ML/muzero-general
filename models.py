@@ -138,10 +138,17 @@ class MuZeroFullyConnectedNetwork(AbstractNetwork):
         # Scale encoded state between [0, 1] (See appendix paper Training)
         min_encoded_state = encoded_state.min(1, keepdim=True)[0]
         max_encoded_state = encoded_state.max(1, keepdim=True)[0]
-        print("min_encoded_state dev", min_encoded_state.device)
+        # print("min_encoded_state dev", min_encoded_state.device)
         scale_encoded_state = max_encoded_state - min_encoded_state
         print("scale_encoded_state dev", scale_encoded_state.device)
-        # scale_encoded_state[scale_encoded_state < 1e-5] += 1e-5
+        
+        try:
+            scale_encoded_state[scale_encoded_state < 1e-5] += 1e-5
+        except Exception as e:
+            print("ERROR - DUMPING XLA STATE")
+            print(torch_xla._XLAC._xla_tensors_report(0, str(scale_encoded_state.device)))
+            raise e
+
         # print("scale_encoded_state postinc dev", scale_encoded_state.device)
         encoded_state_normalized = (
             encoded_state - min_encoded_state
