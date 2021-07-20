@@ -2,6 +2,7 @@ import math
 from abc import ABC, abstractmethod
 
 import torch
+import torch_xla
 
 
 class MuZeroNetwork:
@@ -141,7 +142,7 @@ class MuZeroFullyConnectedNetwork(AbstractNetwork):
         # print("min_encoded_state dev", min_encoded_state.device)
         scale_encoded_state = max_encoded_state - min_encoded_state
         print("scale_encoded_state dev", scale_encoded_state.device)
-        
+
         try:
             scale_encoded_state[scale_encoded_state < 1e-5] += 1e-5
         except Exception as e:
