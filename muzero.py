@@ -175,9 +175,10 @@ class MuZero:
             return canLoadTrainer
 
         # these coordinate between themselves by communicating through the shared_storage_worker
-        # wrappers.runSelfPlayWrapped.remote(self.checkpoint, self.Game, self.config, self.replay_buffer_worker, self.shared_storage_worker)
-        wrappers.runSelfPlayTestWrapped.remote(self.checkpoint, self.Game, self.config, self.replay_buffer_worker, self.shared_storage_worker)
-        # wrappers.runTrainerWrapper.remote(self.checkpoint, self.config, self.replay_buffer_worker, self.shared_storage_worker)
+        wrappers.runSelfPlayWrapped.remote(self.checkpoint, self.Game, self.config, self.replay_buffer_worker, self.shared_storage_worker)
+        wrappers.runTrainerWrapper.remote(self.checkpoint, self.config, self.replay_buffer_worker, self.shared_storage_worker)
+
+        # wrappers.runSelfPlayTestWrapped.remote(self.checkpoint, self.Game, self.config, self.replay_buffer_worker, self.shared_storage_worker)
         
         # todo: get reanalyse working lol
         if self.config.use_last_model_value:
@@ -587,6 +588,9 @@ if __name__ == "__main__":
         # Train directly with "python muzero.py cartpole"
         muzero = MuZero(sys.argv[1])
         muzero.train()
+    elif len(sys.argv) == 3:
+        muzero = MuZero(sys.argv[1])
+        muzero.train(log_in_tensorboard=False)
     else:
         print("\nWelcome to MuZero! Here's a list of games:")
         # Let user pick a game
