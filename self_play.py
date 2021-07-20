@@ -27,14 +27,14 @@ class SelfPlay:
         torch.manual_seed(seed)
 
         # self.device = torch.device(xm.get_xla_supported_devices(devkind="TPU")[2])
-        # self.device = torch.device("xla:2")
+        self.device = xm.xla_device()
 
         # Initialize the network
         self.model = models.MuZeroNetwork(self.config)
         self.model.set_weights(initial_checkpoint["weights"])
-        # self.model.to(self.device)
+        self.model.to(self.device)
         # self.model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
-        self.model.to(xm.xla_device()) # TPU
+        # self.model.to(xm.xla_device()) # TPU
         # self.model.to(torch.device("cpu"))
         self.model.eval()
 
@@ -132,6 +132,8 @@ class SelfPlay:
         game_history.observation_history.append(observation)
         game_history.reward_history.append(0)
         game_history.to_play_history.append(self.game.to_play())
+
+        # observation = torch.tensor(observation).float().to(device)
 
         done = False
 
@@ -287,6 +289,8 @@ class MCTS:
         learned by the network.
         """
 
+
+        print("selfplay copying to:", str(next(model.parameters()).device))
         # device = torch.device("xla:2")
         if override_root_with:
             root = override_root_with
