@@ -47,7 +47,7 @@ class SelfPlay:
             shared_storage.get_info.remote("terminate")
         ):
             # self.model.set_weights(ray.get(shared_storage.get_info.remote("weights")))
-            # self.model.to(self.device)
+            self.model.to(self.device)
             print("playloop start")
 
             if not test_mode:
