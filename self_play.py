@@ -37,7 +37,8 @@ class SelfPlay:
         # self.model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
         # self.model.to(xm.xla_device()) # TPU
         # self.model.to(torch.device("cpu"))
-        self.model.eval()
+        # self.model.eval()
+        self.model.train()
 
     def continuous_self_play(self, shared_storage, replay_buffer, test_mode=False):
         print("playloop before")
@@ -294,7 +295,7 @@ class MCTS:
         # print("mcts copying to:", str(next(model.parameters()).device))
         device = xm.xla_device()
         print("mcts copying to:", device)
-        
+
         if override_root_with:
             root = override_root_with
             root_predicted_value = None
