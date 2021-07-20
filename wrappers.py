@@ -20,29 +20,39 @@ import models
 
 
 # arguments for xmp.spawn 
-N_PROC = 8
+N_PROC = 2
 START_METHOD = "fork"
 
 
 
 
-# @ray.remote()
-# def stonks():
-# 	def map_fn(index):
+@ray.remote()
+def stonks(checkpoint, game, config, replay_buffer_worker, shared_storage_worker):
+	def map_fn(index):
 
-# 		# start the trainer
-# 		if xm.is_master_ordinal():
-# 			xm.rendezvous("selfplay_is_loaded")
-# 			training_worker = trainer.Trainer(checkpoint, config)
+		# start the trainer
+		if xm.is_master_ordinal():
+			xm.rendezvous("selfplay_is_loaded")
+			
+			training_worker = trainer.Trainer(checkpoint, config)
 
-# 			pass # do training stuff here
-
-# 		# start the self-play workers
-# 		if not xm.is_master_ordinal():
-# 			pass # do self-play stuff
+			training_worker.continuous_update_weights(replay_buffer_worker, shared_storage_worker)
 
 
+		# start the self-play
+		if not xm.is_master_ordinal():
+			self_play_worker = self_play.SelfPlay(checkpoint, game, config, config.seed)
 
+			xm.rendezvous("selfplay_is_loaded")
+
+			self_play_worker.continuous_self_play(shared_storage_worker, replay_buffer_worker)
+
+	xmp.spawn(
+		map_fn,
+		args=(),
+		nprocs=N_PROC,
+		start_method=START_METHOD
+		)
 
 
 
