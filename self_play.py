@@ -294,7 +294,7 @@ class MCTS:
         """
 
 
-        # print("selfplay copying to:", str(next(model.parameters()).device))
+        print("selfplay copying to:", str(next(model.parameters()).device))
         # device = torch.device("xla:2")
         if override_root_with:
             root = override_root_with
