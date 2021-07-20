@@ -27,15 +27,16 @@ class SelfPlay:
         torch.manual_seed(seed)
 
         # self.device = torch.device(xm.get_xla_supported_devices(devkind="TPU")[2])
-        self.device = xm.xla_device()
+        # self.device = xm.xla_device()
+        # print("selfplay device:", device)
 
         # Initialize the network
         self.model = models.MuZeroNetwork(self.config)
         self.model.set_weights(initial_checkpoint["weights"])
-        self.model.to(self.device)
+        # self.model.to(self.device)
         # self.model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
         # self.model.to(xm.xla_device()) # TPU
-        # self.model.to(torch.device("cpu"))
+        self.model.to(torch.device("cpu"))
         self.model.eval()
 
     def continuous_self_play(self, shared_storage, replay_buffer, test_mode=False):
@@ -290,7 +291,7 @@ class MCTS:
         """
 
 
-        print("selfplay copying to:", str(next(model.parameters()).device))
+        # print("selfplay copying to:", str(next(model.parameters()).device))
         # device = torch.device("xla:2")
         if override_root_with:
             root = override_root_with
