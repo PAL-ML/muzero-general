@@ -37,8 +37,7 @@ class SelfPlay:
         # self.model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
         # self.model.to(xm.xla_device()) # TPU
         # self.model.to(torch.device("cpu"))
-        # self.model.eval()
-        self.model.train()
+        self.model.eval()
 
     def continuous_self_play(self, shared_storage, replay_buffer, test_mode=False):
         print("playloop before")
@@ -318,9 +317,9 @@ class MCTS:
             # print("reward dev", reward.device)
             # print("policy_logits dev", policy_logits.device)
             # print("hidden_state dev", hidden_state.device)
-            root_predicted_value = models.support_to_scalar(
-                root_predicted_value, self.config.support_size
-            ).item()
+            # root_predicted_value = models.support_to_scalar(
+            #     root_predicted_value, self.config.support_size
+            # ).item()
             reward = models.support_to_scalar(reward, self.config.support_size).item()
             assert (
                 legal_actions
