@@ -291,8 +291,10 @@ class MCTS:
         """
 
 
-        print("mcts copying to:", str(next(model.parameters()).device))
-        # device = torch.device("xla:2")
+        # print("mcts copying to:", str(next(model.parameters()).device))
+        device = xm.xla_device()
+        print("mcts copying to:", device)
+        
         if override_root_with:
             root = override_root_with
             root_predicted_value = None
@@ -302,8 +304,8 @@ class MCTS:
                 torch.tensor(observation)
                 .float()
                 .unsqueeze(0)
-                # .to(device)
-                .to(next(model.parameters()).device)
+                .to(device)
+                # .to(next(model.parameters()).device)
             )
             (
                 root_predicted_value,
@@ -364,8 +366,8 @@ class MCTS:
             parent = search_path[-2]
             value, reward, policy_logits, hidden_state = model.recurrent_inference(
                 parent.hidden_state,
-                # torch.tensor([[action]]).to(device),
-                torch.tensor([[action]]).to(parent.hidden_state.device),
+                torch.tensor([[action]]).to(device),
+                # torch.tensor([[action]]).to(parent.hidden_state.device),
             )
             value = models.support_to_scalar(value, self.config.support_size).item()
             reward = models.support_to_scalar(reward, self.config.support_size).item()
