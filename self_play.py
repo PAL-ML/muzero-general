@@ -47,7 +47,6 @@ class SelfPlay:
             shared_storage.get_info.remote("terminate")
         ):
             # self.model.set_weights(ray.get(shared_storage.get_info.remote("weights")))
-            self.model.to(self.device)
             print("playloop start")
 
             if not test_mode:
@@ -317,9 +316,7 @@ class MCTS:
             # print("reward dev", reward.device)
             # print("policy_logits dev", policy_logits.device)
             # print("hidden_state dev", hidden_state.device)
-            # root_predicted_value = models.support_to_scalar(
-            #     root_predicted_value, self.config.support_size
-            # ).item()
+            root_predicted_value = models.support_to_scalar(root_predicted_value, self.config.support_size).item()
             reward = models.support_to_scalar(reward, self.config.support_size).item()
             assert (
                 legal_actions

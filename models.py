@@ -661,7 +661,6 @@ def support_to_scalar(logits, support_size):
     """
     # Decode to a scalar
     probabilities = torch.softmax(logits, dim=1)
-    print("probs device:", probabilities.device)
     support = (
         torch.tensor([x for x in range(-support_size, support_size + 1)])
         .expand(probabilities.shape)
