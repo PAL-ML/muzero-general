@@ -47,33 +47,34 @@ available_node_types:
         # This takes precedence over min_workers.
         max_workers: 1
         # The resources provided by this node type.
-        resources: {"CPU": 4, "tpu": 1}
+        resources: {"CPU": 4, "gpu": 1}
         # Provider-specific config for this node type, e.g. instance type. By default
         # Ray will auto-configure unspecified fields such as subnets and ssh-keys.
         # For more documentation on available fields, see:
         # https://cloud.google.com/compute/docs/reference/rest/v1/instances/insert
         node_config:
-            tpuVM:
-              - acceleratorType: v2-8
-                runtimeVersion: v2-alpha
-                networkConfig:
-                  enableExternalIps: true
-                schedulingConfig:
-                  preemptible: true
-            # machineType: n1-standard-4
-            # # guestAccelerators:
-            # #   - acceleratorCount: 2
-            # #     acceleratorType: projects/scenic-index-320107/zones/us-west1-a/acceleratorTypes/nvidia-tesla-v100
-            # disks:
-            #   - boot: true
-            #     autoDelete: true
-            #     type: PERSISTENT
-            #     initializeParams:
-            #       diskSizeGb: 50
-            #       # See https://cloud.google.com/compute/docs/images for more images
-            #       sourceImage: projects/deeplearning-platform-release/global/images/family/common-cu110
-            # scheduling:
-            #   - onHostMaintenance: TERMINATE
+            # tpuVM:
+            #   - acceleratorType: v2-8
+            #     runtimeVersion: v2-alpha
+            #     networkConfig:
+            #       enableExternalIps: true
+            #     schedulingConfig:
+            #       preemptible: true
+            machineType: n1-standard-4
+            guestAccelerators:
+              - acceleratorCount: 1
+                acceleratorType: projects/scenic-index-320107/zones/asia-east1-c/acceleratorTypes/nvidia-tesla-v100
+            disks:
+              - boot: true
+                autoDelete: true
+                type: PERSISTENT
+                initializeParams:
+                  diskSizeGb: 50
+                  # See https://cloud.google.com/compute/docs/images for more images
+                  sourceImage: projects/deeplearning-platform-release/global/images/family/common-cu110
+            scheduling:
+              - onHostMaintenance: TERMINATE
+              - preemptible: true
             # Additional options can be found in in the compute docs at
             # https://cloud.google.com/compute/docs/reference/rest/v1/instances/insert
 
@@ -89,38 +90,38 @@ available_node_types:
         # The minimum number of nodes of this type to launch.
         # This number should be >= 0.
         min_workers: 1
-        max_workers: 4
+        max_workers: 3
         # The resources provided by this node type.
-        resources: {"CPU": 2, "tpu": 1}
+        resources: {"CPU": 2, "gpu": 1}
         # Provider-specific config for this node type, e.g. instance type. By default
         # Ray will auto-configure unspecified fields such as subnets and ssh-keys.
         # For more documentation on available fields, see:
         # https://cloud.google.com/compute/docs/reference/rest/v1/instances/insert
         node_config:
-            tpuVM:
-              - acceleratorType: v2-8
-                runtimeVersion: v2-alpha
-                networkConfig:
-                  enableExternalIps: true
-                schedulingConfig:
-                  preemptible: true
-            # machineType: n1-standard-2
-            # # guestAccelerators:
-            # #   - acceleratorCount: 2
-            # #     acceleratorType: projects/scenic-index-320107/zones/us-west1-a/acceleratorTypes/nvidia-tesla-v100
-            # disks:
-            #   - boot: true
-            #     autoDelete: true
-            #     type: PERSISTENT
-            #     initializeParams:
-            #       diskSizeGb: 50
-            #       # See https://cloud.google.com/compute/docs/images for more images
-            #       sourceImage: projects/deeplearning-platform-release/global/images/family/common-cu110
-            # # Run workers on preemtible instance by default.
-            # # Comment this out to use on-demand.
-            # scheduling:
-            #   - onHostMaintenance: TERMINATE
-            #   - preemptible: true
+            # tpuVM:
+            #   - acceleratorType: v2-8
+            #     runtimeVersion: v2-alpha
+            #     networkConfig:
+            #       enableExternalIps: true
+            #     schedulingConfig:
+            #       preemptible: true
+            machineType: n1-standard-2
+            guestAccelerators:
+              - acceleratorCount: 1
+                acceleratorType: projects/scenic-index-320107/zones/asia-east1-c/acceleratorTypes/nvidia-tesla-v100
+            disks:
+              - boot: true
+                autoDelete: true
+                type: PERSISTENT
+                initializeParams:
+                  diskSizeGb: 50
+                  # See https://cloud.google.com/compute/docs/images for more images
+                  sourceImage: projects/deeplearning-platform-release/global/images/family/common-cu110
+            # Run workers on preemtible instance by default.
+            # Comment this out to use on-demand.
+            scheduling:
+              - onHostMaintenance: TERMINATE
+              - preemptible: true
 
     # Additional options can be found in in the compute docs at
     # https://cloud.google.com/compute/docs/reference/rest/v1/instances/insert
