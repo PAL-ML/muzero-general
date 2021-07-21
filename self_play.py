@@ -1,5 +1,6 @@
 import math
 import time
+import os
 
 import numpy
 import ray
@@ -12,7 +13,6 @@ import torch_xla
 import torch_xla.core.xla_model as xm
 
 
-# @ray.remote
 class SelfPlay:
     """
     Class which run in a dedicated thread to play games and save them to the replay-buffer.
@@ -21,6 +21,8 @@ class SelfPlay:
     def __init__(self, initial_checkpoint, Game, config, seed):
         self.config = config
         self.game = Game(seed)
+
+        os.environ["XRT_TPU_CONFIG"] = "localservice;0;localhost:51011"
 
         # Fix random generator seed
         numpy.random.seed(seed)

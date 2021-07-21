@@ -25,7 +25,7 @@ START_METHOD = "fork"
 
 
 # TODO: refactor these names to something more logical
-@ray.remote
+@ray.remote(resources={"tpu": 1})
 def runSelfPlayWrapped(checkpoint, game, config, replay_buffer_worker, shared_storage_worker):
 	# TODO: logging loop!
 
@@ -41,16 +41,16 @@ def runSelfPlayWrapped(checkpoint, game, config, replay_buffer_worker, shared_st
 		print("selfplay continuous beginning")
 		self_play_worker.continuous_self_play(shared_storage_worker, replay_buffer_worker)
 
-	map_fn(None)
+	# map_fn(None)
 
-	# xmp.spawn(
-	# 	map_fn,
-	# 	args=(),
-	# 	nprocs=N_PROC,
-	# 	start_method=START_METHOD
-	# 	)
+	xmp.spawn(
+		map_fn,
+		args=(),
+		nprocs=N_PROC,
+		start_method=START_METHOD
+		)
 
-@ray.remote
+@ray.remote(resources={"tpu": 1})
 def runTrainerWrapper(checkpoint, config, replay_buffer_worker, shared_storage_worker):
 	def map_fn(index):
 		c = 0
@@ -70,14 +70,14 @@ def runTrainerWrapper(checkpoint, config, replay_buffer_worker, shared_storage_w
 			replay_buffer_worker, shared_storage_worker
 		)
 
-	map_fn(None)
+	# map_fn(None)
 
-	# xmp.spawn(
-	# 	map_fn,
-	# 	args=(),
-	# 	nprocs=1, 
-	# 	start_method=START_METHOD
-	# 	)
+	xmp.spawn(
+		map_fn,
+		args=(),
+		nprocs=1, 
+		start_method=START_METHOD
+		)
 
 # TODO: migrate this to a function and generally get it working
 @ray.remote

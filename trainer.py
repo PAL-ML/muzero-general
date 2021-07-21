@@ -26,6 +26,7 @@ class Trainer:
         numpy.random.seed(self.config.seed)
         torch.manual_seed(self.config.seed)
 
+        os.environ["XRT_TPU_CONFIG"] = "localservice;0;localhost:51011"
 
         # self.device = torch.device(xm.get_xla_supported_devices(devkind="TPU")[0])
         # self.device = torch.device("xla:3")
@@ -278,7 +279,7 @@ class Trainer:
         # Optimize
         self.optimizer.zero_grad()
         loss.backward()
-        self.optimizer.step()
+        xm.optimizer_step(self.optimizer, barrier=True)
         self.training_step += 1
 
         return (
