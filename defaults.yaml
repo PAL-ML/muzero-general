@@ -14,10 +14,10 @@ upscaling_speed: 1.0
 # This executes all commands on all nodes in the docker container,
 # and opens all the necessary ports to support the Ray cluster.
 # Empty string means disabled.
-docker: {}
-# image: "gcr.io/tpu-pytorch/xla:r1.9"
-# # image: rayproject/ray:latest-gpu   # use this one if you don't need ML dependencies, it's faster to pull
-# container_name: "ray_xla_docker" # e.g. ray_docker
+docker:
+    image: "rayproject/ray:nightly-py37-cpu"
+    # image: rayproject/ray:latest-gpu   # use this one if you don't need ML dependencies, it's faster to pull
+    container_name: "ray_nvidia_docker"
 
 # If a node is idle for this many minutes, it will be removed.
 idle_timeout_minutes: 5
@@ -184,8 +184,12 @@ setup_commands:
     - sudo pip3 install torch==1.9.0
     - sudo pip3 install torchvision==0.10.0
     - sudo pip3 install https://storage.googleapis.com/tpu-pytorch/wheels/tpuvm/torch_xla-1.9-cp38-cp38-linux_x86_64.whl
-    - pip3 install ray[default] numpy tensorboard gym seaborn nevergrad
+    - pip3 install numpy tensorboard gym seaborn nevergrad aiohttp aiohttp-cors aioredis 
     - pip3 install cloud-tpu-client==0.10
+    - git clone https://github.com/aryavohra/ray
+    - wget https://s3-us-west-2.amazonaws.com/ray-wheels/latest/ray-2.0.0.dev0-cp38-cp38-manylinux2014_x86_64.whl
+    - pip3 install ray-2.0.0.dev0-cp38-cp38-manylinux2014_x86_64.whl[default]
+    - cd ray; python3 python/ray/setup-dev.py -y; cd ..
 
 
 # Custom commands that will be run on the head node after common setup.
