@@ -187,12 +187,11 @@ class MuZero:
         """
         Keep track of the training performance.
         """
-        # Launch the test worker to get performance metrics
-        # self.test_worker = wrappers.SelfPlayWrapper.options().remote()
-        # self.test_worker.run.remote(
-        #     we don't pass in the replay buffer worker b/c shouldn't need it
-        #     num_gpus, self.config, self.checkpoint, self.Game, self.shared_storage_worker, None, test_mode=True
-        # )
+        Launch the test worker to get performance metrics
+        self.test_worker = wrappers.SelfPlayWrapper.options().remote()
+        self.test_worker.run.remote(
+            num_gpus, self.config, self.checkpoint, self.Game, self.shared_storage_worker, None, test_mode=True
+        )
 
         # Write everything in TensorBoard
         writer = SummaryWriter(self.config.results_path)

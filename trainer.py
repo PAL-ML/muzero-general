@@ -81,12 +81,10 @@ class Trainer:
             time.sleep(0.1)
 
         next_batch = replay_buffer.get_batch.remote()
-        print("weightupdate preloop")
         # Training loop
         while self.training_step < self.config.training_steps and not ray.get(
             shared_storage.get_info.remote("terminate")
         ):
-            print("weightloop loop - start")
             index_batch, batch = ray.get(next_batch)
             next_batch = replay_buffer.get_batch.remote()
             self.update_lr()
@@ -139,7 +137,6 @@ class Trainer:
                     and not ray.get(shared_storage.get_info.remote("terminate"))
                 ):
                     time.sleep(0.5)
-            print("weightloop is done w weight updates and whatever")
 
 
     def update_weights(self, batch):

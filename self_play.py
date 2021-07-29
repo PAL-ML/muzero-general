@@ -42,14 +42,12 @@ class SelfPlay:
         self.model.eval()
 
     def continuous_self_play(self, shared_storage, replay_buffer, test_mode=False):
-        print("playloop before")
         while ray.get(
             shared_storage.get_info.remote("training_step")
         ) < self.config.training_steps and not ray.get(
             shared_storage.get_info.remote("terminate")
         ):
-            # self.model.set_weights(ray.get(shared_storage.get_info.remote("weights")))
-            print("playloop start")
+            self.model.set_weights(ray.get(shared_storage.get_info.remote("weights")))
 
             if not test_mode:
                 game_history = self.play_game(
@@ -120,7 +118,6 @@ class SelfPlay:
                 ):
                     time.sleep(0.5)
 
-            print("playloop end")
         self.close_game()
         
 
@@ -291,10 +288,7 @@ class MCTS:
         learned by the network.
         """
 
-
-        # print("mcts copying to:", str(next(model.parameters()).device))
         device = xm.xla_device()
-        print("mcts copying to:", device)
 
         if override_root_with:
             root = override_root_with
