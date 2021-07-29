@@ -31,8 +31,8 @@ class Trainer:
 
         # self.device = torch.device(xm.get_xla_supported_devices(devkind="TPU")[0])
         # self.device = torch.device("xla:3")
-        # self.device = xm.xla_device()
-        self.device = torch.device("cpu")
+        self.device = xm.xla_device()
+        # self.device = torch.device("cpu")
         print("trainer device:", self.device)
 
         # Initialize the network
