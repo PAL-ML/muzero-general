@@ -25,7 +25,7 @@ START_METHOD = "fork"
 
 
 # TODO: refactor these names to something more logical
-@ray.remote(resources={"tpu": 1})
+@ray.remote
 def runSelfPlayWrapped(checkpoint, game, config, replay_buffer_worker, shared_storage_worker, test=False):
 	# TODO: logging loop!
 

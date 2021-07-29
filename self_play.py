@@ -75,7 +75,6 @@ class SelfPlay:
                     "self" if len(self.config.players) == 1 else self.config.opponent,
                     self.config.muzero_player,
                 )
-
                 # Save to the shared storage
                 shared_storage.set_info.remote(
                     {
