@@ -169,17 +169,17 @@ class MuZero:
 
         # these coordinate between themselves by communicating through the shared_storage_worker
         
-        [
-            wrappers.runSelfPlayWrapped.remote(
-                self.checkpoint,
-                self.Game,
-                self.config,
-                self.config.seed + seed,
-                self.replay_buffer_worker,
-                self.shared_storage_worker
-            )
-            for seed in range(self.config.num_workers)
-        ]
+        # [
+        wrappers.runSelfPlayWrapped.remote(
+            self.checkpoint,
+            self.Game,
+            self.config,
+            self.config.seed + seed,
+            self.replay_buffer_worker,
+            self.shared_storage_worker
+        )
+        #     for seed in range(self.config.num_workers)
+        # ]
         
 
         wrappers.runTrainerWrapper.remote(self.checkpoint, self.config, self.replay_buffer_worker, self.shared_storage_worker)

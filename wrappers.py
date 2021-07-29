@@ -20,7 +20,7 @@ import models
 
 
 # arguments for xmp.spawn 
-N_PROC = 8
+N_PROC = 1
 START_METHOD = "fork"
 
 
