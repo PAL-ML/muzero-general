@@ -187,7 +187,6 @@ class MuZero:
         """
         Keep track of the training performance.
         """
-        Launch the test worker to get performance metrics
         self.test_worker = wrappers.runSelfPlayWrapped.options().remote()
         self.test_worker.run.remote(
             num_gpus, self.config, self.checkpoint, self.Game, self.shared_storage_worker, None, test_mode=True
