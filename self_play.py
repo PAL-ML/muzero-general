@@ -165,7 +165,7 @@ class SelfPlay:
                         self.game.legal_actions(),
                         self.game.to_play(),
                         True,
-                        self.tpu
+                        tpu=self.tpu
                     )
                     action = self.select_action(
                         root,
@@ -215,7 +215,7 @@ class SelfPlay:
                 self.game.legal_actions(),
                 self.game.to_play(),
                 True,
-                self.tpu
+                tpu=self.tpu
             )
             print(f'Tree depth: {mcts_info["max_tree_depth"]}')
             print(f"Root value for player {self.game.to_play()}: {root.value():.2f}")
