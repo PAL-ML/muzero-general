@@ -24,30 +24,36 @@ N_PROC = 1
 START_METHOD = "fork"
 
 
+@ray.remote
+
+
 # TODO: refactor these names to something more logical
 @ray.remote
-def runSelfPlayWrapped(checkpoint, game, config, replay_buffer_worker, shared_storage_worker):
+def runSelfPlayWrapped(checkpoint, game, config, replay_buffer_worker, shared_storage_worker, test=False):
 	# TODO: logging loop!
 
-	def map_fn(index):
-		print("selfplay instantiation begins")
+	if not test:
+		def map_fn(index):
+			print("selfplay instantiation begins")
+			self_play_worker = self_play.SelfPlay(checkpoint, game, config, config.seed)
+
+			# when we have multiple self-play workers, we'll want this to happen only when all of them
+			# are ready. we can achieve that using rendezvous and taking advantage of spawn's blocking 
+			shared_storage_worker.set_info.remote("trainer_can_start", True)
+			
+			print("selfplay continuous beginning")
+			self_play_worker.continuous_self_play(shared_storage_worker, replay_buffer_worker)
+
+		xmp.spawn(
+			map_fn,
+			args=(),
+			nprocs=N_PROC,
+			start_method=START_METHOD
+			)
+	else:
 		self_play_worker = self_play.SelfPlay(checkpoint, game, config, config.seed)
+		self_play_worker.continuous_self_play(shared_storage_worker, None, True)
 
-		# when we have multiple self-play workers, we'll want this to happen only when all of them
-		# are ready. we can achieve that using rendezvous and taking advantage of spawn's blocking 
-		shared_storage_worker.set_info.remote("trainer_can_start", True)
-		
-		print("selfplay continuous beginning")
-		self_play_worker.continuous_self_play(shared_storage_worker, replay_buffer_worker)
-
-	# map_fn(None)
-
-	xmp.spawn(
-		map_fn,
-		args=(),
-		nprocs=N_PROC,
-		start_method=START_METHOD
-		)
 
 @ray.remote(resources={"tpu": 1})
 def runTrainerWrapper(checkpoint, config, replay_buffer_worker, shared_storage_worker):
