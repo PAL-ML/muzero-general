@@ -204,6 +204,7 @@ class MuZero:
             self.checkpoint,
             self.Game,
             self.config,
+            self.config.seed,
             self.replay_buffer_worker,
             self.shared_storage_worker,
             test=True
