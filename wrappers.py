@@ -3,7 +3,7 @@
 # answer: if we use muzero terminate_workers, the processes will exit on their own
 
 # TODO: add imports lol
-
+import os
 import ray
 import torch # can theoretically remove
 import torch_xla
@@ -28,6 +28,8 @@ START_METHOD = "fork"
 @ray.remote(resources={"tpu": 1})
 def runSelfPlayWrapped(checkpoint, game, config, replay_buffer_worker, shared_storage_worker, test=False):
 	# TODO: logging loop!
+
+	os.environ["XRT_TPU_CONFIG"] = "localservice;0;localhost:51011"
 
 	if not test:
 		def map_fn(index):

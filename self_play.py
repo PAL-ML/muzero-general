@@ -86,6 +86,7 @@ class SelfPlay:
                         ),
                     }
                 )
+                print(sum(game_history.reward_history))
                 if 1 < len(self.config.players):
                     shared_storage.set_info.remote(
                         {
