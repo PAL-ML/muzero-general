@@ -21,6 +21,7 @@ class SelfPlay:
     def __init__(self, initial_checkpoint, Game, config, seed, tpu=True):
         self.config = config
         self.game = Game(seed)
+        self.tpu = tpu
 
         # Fix random generator seed
         numpy.random.seed(seed)
@@ -163,7 +164,8 @@ class SelfPlay:
                         stacked_observations,
                         self.game.legal_actions(),
                         self.game.to_play(),
-                        True
+                        True,
+                        self.tpu
                     )
                     action = self.select_action(
                         root,
@@ -213,6 +215,7 @@ class SelfPlay:
                 self.game.legal_actions(),
                 self.game.to_play(),
                 True,
+                self.tpu
             )
             print(f'Tree depth: {mcts_info["max_tree_depth"]}')
             print(f"Root value for player {self.game.to_play()}: {root.value():.2f}")
@@ -282,6 +285,7 @@ class MCTS:
         to_play,
         add_exploration_noise,
         override_root_with=None,
+        tpu=True
     ):
         """
         At the root of the search tree we use the representation function to obtain a
@@ -289,8 +293,10 @@ class MCTS:
         We then run a Monte Carlo Tree Search using only action sequences and the model
         learned by the network.
         """
-
-        device = xm.xla_device()
+        if tpu:
+            device = xm.xla_device()
+        else:
+            device = torch.device("cpu")
 
         if override_root_with:
             root = override_root_with
