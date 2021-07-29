@@ -24,9 +24,6 @@ N_PROC = 1
 START_METHOD = "fork"
 
 
-@ray.remote
-
-
 # TODO: refactor these names to something more logical
 @ray.remote
 def runSelfPlayWrapped(checkpoint, game, config, replay_buffer_worker, shared_storage_worker, test=False):
