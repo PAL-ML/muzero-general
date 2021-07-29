@@ -25,7 +25,7 @@ START_METHOD = "fork"
 
 
 # TODO: refactor these names to something more logical
-@ray.remote
+@ray.remote(resources={"tpu": 1})
 def runSelfPlayWrapped(checkpoint, game, config, replay_buffer_worker, shared_storage_worker, test=False):
 	# TODO: logging loop!
 
@@ -48,7 +48,7 @@ def runSelfPlayWrapped(checkpoint, game, config, replay_buffer_worker, shared_st
 			start_method=START_METHOD
 			)
 	else:
-		self_play_worker = self_play.SelfPlay(checkpoint, game, config, config.seed)
+		self_play_worker = self_play.SelfPlay(checkpoint, game, config, config.seed, tpu=False)
 		self_play_worker.continuous_self_play(shared_storage_worker, None, True)
 
 

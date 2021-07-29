@@ -18,18 +18,20 @@ class SelfPlay:
     Class which run in a dedicated thread to play games and save them to the replay-buffer.
     """
 
-    def __init__(self, initial_checkpoint, Game, config, seed):
+    def __init__(self, initial_checkpoint, Game, config, seed, tpu=True):
         self.config = config
         self.game = Game(seed)
-
-        os.environ["XRT_TPU_CONFIG"] = "localservice;0;localhost:51011"
 
         # Fix random generator seed
         numpy.random.seed(seed)
         torch.manual_seed(seed)
 
-        # self.device = torch.device(xm.get_xla_supported_devices(devkind="TPU")[2])
-        self.device = xm.xla_device()
+        if tpu:
+            os.environ["XRT_TPU_CONFIG"] = "localservice;0;localhost:51011"
+            self.device = xm.xla_device()
+        else:
+            self.device = torch.device("cpu")
+
         print("selfplay device:", self.device)
 
         # Initialize the network
