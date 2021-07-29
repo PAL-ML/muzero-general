@@ -14,6 +14,7 @@ class SharedStorage:
     def __init__(self, checkpoint, config):
         self.config = config
         self.current_checkpoint = copy.deepcopy(checkpoint)
+        os.makedirs(self.config.results_path, exist_ok=True)
 
     def save_checkpoint(self, path=None):
         if not path:
