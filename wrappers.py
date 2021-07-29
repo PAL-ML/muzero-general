@@ -25,14 +25,13 @@ START_METHOD = "fork"
 
 
 # TODO: refactor these names to something more logical
-@ray.remote(resources={"tpu": 1})
+@ray.remote
 def runSelfPlayWrapped(checkpoint, game, config, replay_buffer_worker, shared_storage_worker):
 	# TODO: logging loop!
 
 	def map_fn(index):
 		print("selfplay instantiation begins")
 		self_play_worker = self_play.SelfPlay(checkpoint, game, config, config.seed)
-		print("selfplay instantiation begins")
 
 		# when we have multiple self-play workers, we'll want this to happen only when all of them
 		# are ready. we can achieve that using rendezvous and taking advantage of spawn's blocking 

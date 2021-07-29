@@ -168,7 +168,7 @@ class MuZero:
         # order: start self-play, then trainer, then reanalyse (if at all)
 
         # these coordinate between themselves by communicating through the shared_storage_worker
-        wrappers.runSelfPlayWrapped.remote(self.checkpoint, self.Game, self.config, self.replay_buffer_worker, self.shared_storage_worker)
+        wrappers.runSelfPlayWrapped.options(resources={"tpu": 1}).remote(self.checkpoint, self.Game, self.config, self.replay_buffer_worker, self.shared_storage_worker)
         wrappers.runTrainerWrapper.remote(self.checkpoint, self.config, self.replay_buffer_worker, self.shared_storage_worker)
         
         # todo: get reanalyse working lol
@@ -188,7 +188,7 @@ class MuZero:
         Keep track of the training performance.
         """
         Launch the test worker to get performance metrics
-        self.test_worker = wrappers.SelfPlayWrapper.options().remote()
+        self.test_worker = wrappers.runSelfPlayWrapped.options().remote()
         self.test_worker.run.remote(
             num_gpus, self.config, self.checkpoint, self.Game, self.shared_storage_worker, None, test_mode=True
         )
